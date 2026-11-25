@@ -20,3 +20,9 @@
 - **`invalid_windows_name` coverage:** Because Windows NTFS forbids writing filenames with literal `< > : " | ? *` or reserved names like `CON`/`NUL` on disk, the sample generator does not write those onto the local filesystem; the detector is thoroughly covered across 16 invalid filename cases in `test/detectors.test.js`.
 - **Duplicate folder naming:** Placed the 3 synthetic duplicates in `unsorted-duplicates/` so alphabetical sorting treats the original folders (`client-proposals/`, `finance/`, `photos/`) as primary copies and flags the unsorted copies as duplicates.
 - **Portable folder label in reports:** Used a relative folder path (falling back to folder basename) in report headers instead of the host machine's absolute path so generated reports contain no local user directory paths and reproduce cleanly across machines.
+
+## Review fixes (2026-11-24, Claude Code)
+
+- **JPEG truncation false positives:** the check looked for `FFD9` only in the last 32 bytes, so phone photos that store data after the image (camera metadata, Samsung `SEFT` trailers, Pixel/Samsung motion-photo MP4 clips) would have been reported as cut off. It now searches the 64 KB tail window, and the scanner notes an MP4 `ftyp` box after the end-of-image marker while streaming. Tests cover trailing metadata, motion photos, Samsung trailers, and a large cut-off photo that must still be flagged. Known limit: a small (<64 KB) JPEG with an embedded thumbnail that is cut off after the thumbnail can pass as healthy.
+- **Client wording:** findings read "Named .docx, but the contents are a web page (HTML)" instead of "Extension is .docx (expected zip), but file header detected html"; truncation lines are in plain English.
+- **Line endings:** `.gitattributes` forces LF for text so regenerated reports match the committed ones on Windows and Linux.

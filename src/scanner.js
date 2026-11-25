@@ -43,6 +43,14 @@ function readFileReadOnly(fsPath, size) {
   const tailWindowCap = Math.min(size, TAIL_LIMIT);
   let tailBuf = Buffer.alloc(0);
 
+  // JPEG motion photos (Pixel, Samsung) append an MP4 clip after the photo's
+  // end-of-image marker; track that while streaming so a big trailer is not
+  // mistaken for a cut-off photo.
+  let isJpeg = null;
+  let sawEoi = false;
+  let jpegVideoAfterEoi = false;
+  let carry = Buffer.alloc(0);
+
   const fd = fs.openSync(fsPath, 'r');
   try {
     const chunk = Buffer.allocUnsafe(Math.min(CHUNK_SIZE, size));
@@ -62,6 +70,19 @@ function readFileReadOnly(fsPath, size) {
             break;
           }
         }
+      }
+
+      if (isJpeg === null) isJpeg = view.length >= 3 && view[0] === 0xff && view[1] === 0xd8 && view[2] === 0xff;
+      if (isJpeg && !jpegVideoAfterEoi) {
+        const b = carry.length ? Buffer.concat([carry, view]) : view;
+        for (let i = 0; i + 1 < b.length; i++) {
+          if (b[i] === 0xff && b[i + 1] === 0xd9) sawEoi = true;
+          else if (sawEoi && b[i] === 0x66 && i + 3 < b.length && b[i + 1] === 0x74 && b[i + 2] === 0x79 && b[i + 3] === 0x70) {
+            jpegVideoAfterEoi = true; // "ftyp": start of an MP4/MOV box
+            break;
+          }
+        }
+        carry = Buffer.from(b.subarray(Math.max(0, b.length - 3)));
       }
 
       if (scanCollected < SCAN_LIMIT) {
@@ -93,6 +114,7 @@ function readFileReadOnly(fsPath, size) {
     headBuf: scanBuf.subarray(0, Math.min(HEAD_LIMIT, scanBuf.length)),
     tailBuf,
     scanBuf,
+    jpegVideoAfterEoi,
   };
 }
 
@@ -124,7 +146,7 @@ export function scanDirectory(rootDir) {
     const size = stat.size;
     totalBytes += size;
 
-    const { sha256, allZero, headBuf, tailBuf, scanBuf } = readFileReadOnly(fsPath, size);
+    const { sha256, allZero, headBuf, tailBuf, scanBuf, jpegVideoAfterEoi } = readFileReadOnly(fsPath, size);
     const { ext, detectedType, findings } = analyzeSingleFile({
       relPath,
       fullPath,
@@ -133,6 +155,7 @@ export function scanDirectory(rootDir) {
       headBuf,
       tailBuf,
       scanBuf,
+      jpegVideoAfterEoi,
     });
 
     files.push({

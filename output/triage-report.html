@@ -196,22 +196,22 @@
             <tr>
               <td class="mono path-cell">client-proposals/meadowbrook-clinic-sow.docx</td>
               <td class="num nowrap">738 B</td>
-              <td>Extension is .docx (expected zip), but file header detected html</td>
+              <td>Named .docx, but the contents are a web page (HTML)</td>
             </tr>
             <tr>
               <td class="mono path-cell">finance/2026-10-merchant-statement.pdf</td>
               <td class="num nowrap">737 B</td>
-              <td>Extension is .pdf (expected pdf), but file header detected html</td>
+              <td>Named .pdf, but the contents are a web page (HTML)</td>
             </tr>
             <tr>
               <td class="mono path-cell">photos/catalog-hero-banner.png</td>
               <td class="num nowrap">696 B</td>
-              <td>Extension is .png (expected png), but file header detected jpeg</td>
+              <td>Named .png, but the contents are a JPEG photo</td>
             </tr>
             <tr>
               <td class="mono path-cell">photos/trade-show-badge-photo.jpg</td>
               <td class="num nowrap">826 B</td>
-              <td>Extension is .jpg (expected jpeg), but file header detected pdf</td>
+              <td>Named .jpg, but the contents are a PDF</td>
             </tr>
             </tbody>
           </table>
@@ -310,22 +310,22 @@
             <tr>
               <td class="mono path-cell">client-proposals/2026-q2-birchwood-contract.docx</td>
               <td class="num nowrap">867 B</td>
-              <td>ZIP/Office container (.docx) is missing End-of-Central-Directory (EOCD) record</td>
+              <td>.docx file ends before its closing ZIP directory record (EOCD)</td>
             </tr>
             <tr>
               <td class="mono path-cell">finance/2026-10-invoice-batch.pdf</td>
               <td class="num nowrap">675 B</td>
-              <td>PDF file has %PDF- header but is missing %%EOF end marker</td>
+              <td>PDF starts normally but ends before its %%EOF end marker</td>
             </tr>
             <tr>
               <td class="mono path-cell">photos/event-stage-wide.jpg</td>
               <td class="num nowrap">616 B</td>
-              <td>JPEG image is missing FFD9 end-of-image (EOI) marker</td>
+              <td>JPEG photo stops before its end-of-image marker (FFD9)</td>
             </tr>
             <tr>
               <td class="mono path-cell">photos/logo-print-master.png</td>
               <td class="num nowrap">591 B</td>
-              <td>PNG image is missing IEND trailer chunk</td>
+              <td>PNG image ends before its IEND end chunk</td>
             </tr>
             </tbody>
           </table>

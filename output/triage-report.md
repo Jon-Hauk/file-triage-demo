@@ -33,10 +33,10 @@ Read-only scan of `samples/broken-copy`. No files were moved, renamed, modified,
 
 | File | Size | What the scan saw |
 |---|---|---|
-| `client-proposals/meadowbrook-clinic-sow.docx` | 738 B | Extension is .docx (expected zip), but file header detected html |
-| `finance/2026-10-merchant-statement.pdf` | 737 B | Extension is .pdf (expected pdf), but file header detected html |
-| `photos/catalog-hero-banner.png` | 696 B | Extension is .png (expected png), but file header detected jpeg |
-| `photos/trade-show-badge-photo.jpg` | 826 B | Extension is .jpg (expected jpeg), but file header detected pdf |
+| `client-proposals/meadowbrook-clinic-sow.docx` | 738 B | Named .docx, but the contents are a web page (HTML) |
+| `finance/2026-10-merchant-statement.pdf` | 737 B | Named .pdf, but the contents are a web page (HTML) |
+| `photos/catalog-hero-banner.png` | 696 B | Named .png, but the contents are a JPEG photo |
+| `photos/trade-show-badge-photo.jpg` | 826 B | Named .jpg, but the contents are a PDF |
 
 ## Empty files (0 bytes) (3 files)
 
@@ -66,10 +66,10 @@ Read-only scan of `samples/broken-copy`. No files were moved, renamed, modified,
 
 | File | Size | What the scan saw |
 |---|---|---|
-| `client-proposals/2026-q2-birchwood-contract.docx` | 867 B | ZIP/Office container (.docx) is missing End-of-Central-Directory (EOCD) record |
-| `finance/2026-10-invoice-batch.pdf` | 675 B | PDF file has %PDF- header but is missing %%EOF end marker |
-| `photos/event-stage-wide.jpg` | 616 B | JPEG image is missing FFD9 end-of-image (EOI) marker |
-| `photos/logo-print-master.png` | 591 B | PNG image is missing IEND trailer chunk |
+| `client-proposals/2026-q2-birchwood-contract.docx` | 867 B | .docx file ends before its closing ZIP directory record (EOCD) |
+| `finance/2026-10-invoice-batch.pdf` | 675 B | PDF starts normally but ends before its %%EOF end marker |
+| `photos/event-stage-wide.jpg` | 616 B | JPEG photo stops before its end-of-image marker (FFD9) |
+| `photos/logo-print-master.png` | 591 B | PNG image ends before its IEND end chunk |
 
 ## Cloud placeholder stubs (not full files) (4 files)
 

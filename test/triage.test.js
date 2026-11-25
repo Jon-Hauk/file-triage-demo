@@ -30,7 +30,29 @@ function snapshotTree(rootDir) {
   return records;
 }
 
-test('scanner reconciles 100% against generated truth.json with zero false positives and stays read-only', () => {
+test('scanner: motion photo (MP4 after the JPEG) is healthy; a cut-off large JPEG is flagged', async () => {
+  const { makeValidJpeg } = await import('../src/sample.js');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'file-triage-jpeg-'));
+  try {
+    const jpg = makeValidJpeg('motion');
+    // ~300 KB MP4-like clip: a box header with "ftyp", then filler, so the
+    // FFD9 marker sits far outside the scanner's 64 KB tail window.
+    const clip = Buffer.concat([Buffer.from([0, 0, 0, 0x18]), Buffer.from('ftypmp42'), Buffer.alloc(300 * 1024, 0x11)]);
+    fs.writeFileSync(path.join(tmpDir, 'PXL_motion.jpg'), Buffer.concat([jpg, clip]));
+    // A big photo cut off mid-image: header plus image data, no FFD9 anywhere.
+    const cut = Buffer.concat([jpg.subarray(0, 20), Buffer.alloc(300 * 1024, 0x22)]);
+    fs.writeFileSync(path.join(tmpDir, 'cut-photo.jpg'), cut);
+
+    const result = scanDirectory(tmpDir);
+    const issues = Object.fromEntries(result.files.map((f) => [f.path, f.issues]));
+    assert.deepEqual(issues['PXL_motion.jpg'], []);
+    assert.deepEqual(issues['cut-photo.jpg'], ['truncated_file']);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('scanner reconciles 100%against generated truth.json with zero false positives and stays read-only', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'file-triage-test-'));
   const sampleDir = path.join(tmpDir, 'broken-copy');
   const truthPath = path.join(tmpDir, 'truth.json');

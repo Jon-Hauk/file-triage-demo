@@ -104,7 +104,9 @@ const WINDOWS_RESERVED_NAME_RE = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\.|$)/i;
 
 const PNG_SIG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const PNG_IEND = Buffer.from([0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82]);
-const OLE2_SIG = Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]);
+const JPEG_EOI = Buffer.from([0xff, 0xd9]);
+const SAMSUNG_TRAILER = Buffer.from('SEFT', 'ascii');
+const OLE2_SIG =Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]);
 const ENCRYPTION_INFO_UTF16 = Buffer.from('EncryptionInfo', 'utf16le');
 const ENCRYPTED_PKG_UTF16 = Buffer.from('EncryptedPackage', 'utf16le');
 const ENCRYPTION_INFO_ASCII = Buffer.from('EncryptionInfo', 'ascii');
@@ -271,7 +273,7 @@ export function checkPasswordProtected(ext, headBuf, scanBuf = headBuf) {
 /**
  * Check whether an image, PDF, or ZIP-based document appears cut off before its end marker.
  */
-export function checkTruncation(ext, headBuf, tailBuf, size) {
+export function checkTruncation(ext, headBuf, tailBuf, size, opts = {}) {
   if (size <= 0) return { detected: false, details: null };
 
   const lowerExt = ext.toLowerCase();
@@ -298,7 +300,7 @@ export function checkTruncation(ext, headBuf, tailBuf, size) {
     }
     return {
       detected: true,
-      details: `ZIP/Office container (${lowerExt}) is missing End-of-Central-Directory (EOCD) record`,
+      details: `${lowerExt} file ends before its closing ZIP directory record (EOCD)`,
     };
   }
 
@@ -307,24 +309,24 @@ export function checkTruncation(ext, headBuf, tailBuf, size) {
     if (!tailSlice.includes('%%EOF')) {
       return {
         detected: true,
-        details: 'PDF file has %PDF- header but is missing %%EOF end marker',
+        details: 'PDF starts normally but ends before its %%EOF end marker',
       };
     }
   }
 
   if (magic === 'jpeg') {
-    const tailSlice = tailBuf.subarray(Math.max(0, tailBuf.length - 32));
-    let foundEoi = false;
-    for (let i = 0; i + 1 < tailSlice.length; i++) {
-      if (tailSlice[i] === 0xff && tailSlice[i + 1] === 0xd9) {
-        foundEoi = true;
-        break;
-      }
-    }
+    // Many cameras and phones store extra data after the end-of-image marker
+    // (FFD9): thumbnails, Samsung "SEFT" trailers, or a whole MP4 clip for
+    // Pixel/Samsung motion photos. So search the whole tail window rather than
+    // the last few bytes, and accept known trailers even when the marker sits
+    // further back than the window.
+    let foundEoi = tailBuf.includes(JPEG_EOI);
+    if (!foundEoi && opts.jpegVideoAfterEoi) foundEoi = true;
+    if (!foundEoi && tailBuf.subarray(Math.max(0, tailBuf.length - 8)).includes(SAMSUNG_TRAILER)) foundEoi = true;
     if (!foundEoi) {
       return {
         detected: true,
-        details: 'JPEG image is missing FFD9 end-of-image (EOI) marker',
+        details: 'JPEG photo stops before its end-of-image marker (FFD9)',
       };
     }
   }
@@ -334,7 +336,7 @@ export function checkTruncation(ext, headBuf, tailBuf, size) {
     if (!tailSlice.includes(PNG_IEND)) {
       return {
         detected: true,
-        details: 'PNG image is missing IEND trailer chunk',
+        details: 'PNG image ends before its IEND end chunk',
       };
     }
   }
@@ -388,7 +390,22 @@ export function checkPathAndName(relPath, fullPath = relPath) {
 /**
  * Evaluate all single-file checks (everything except cross-file duplicate detection).
  */
-export function analyzeSingleFile({ relPath, fullPath, size, allZero, headBuf, tailBuf, scanBuf }) {
+// Plain-English names for detected file types, used in client-facing reports.
+export const TYPE_LABELS = {
+  pdf: 'a PDF',
+  png: 'a PNG image',
+  jpeg: 'a JPEG photo',
+  gif: 'a GIF image',
+  zip: 'a ZIP-based file (Word/Excel/PowerPoint or .zip)',
+  ole2: 'an older Office file (.doc/.xls/.ppt)',
+  rtf: 'a rich-text (RTF) document',
+  html: 'a web page (HTML)',
+  xml: 'an XML file',
+  unknown: 'an unrecognised format',
+};
+const typeLabel = (t) => TYPE_LABELS[t] ?? `${t} data`;
+
+export function analyzeSingleFile({ relPath, fullPath, size, allZero, headBuf, tailBuf, scanBuf, jpegVideoAfterEoi = false }) {
   const ext = path.extname(relPath).toLowerCase();
   const magic = size === 0 ? 'empty' : allZero ? 'all_zero' : detectMagicType(headBuf);
   const findings = [];
@@ -413,11 +430,11 @@ export function analyzeSingleFile({ relPath, fullPath, size, allZero, headBuf, t
       if (!encryptedOle2Ooxml && expected && !expected.includes(magic)) {
         findings.push({
           code: 'extension_mismatch',
-          details: `Extension is ${ext} (expected ${expected.join('/')}), but file header detected ${magic}`,
+          details: `Named ${ext}, but the contents are ${typeLabel(magic)}`,
         });
       }
 
-      const trunc = checkTruncation(ext, headBuf, tailBuf, size);
+      const trunc = checkTruncation(ext, headBuf, tailBuf, size, { jpegVideoAfterEoi });
       if (trunc.detected) {
         findings.push({ code: 'truncated_file', details: trunc.details });
       }

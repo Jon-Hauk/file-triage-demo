@@ -136,6 +136,19 @@ test('checkTruncation validates complete vs truncated ZIP/DOCX, PDF, JPEG, and P
   const cutJpg = jpg.subarray(0, jpg.length - 10);
   assert.equal(checkTruncation('.jpg', cutJpg, cutJpg, cutJpg.length).detected, true);
 
+  // Phones and cameras often store extra data after the end-of-image marker.
+  const withTrailer = Buffer.concat([jpg, Buffer.alloc(40 * 1024, 0x41)]);
+  assert.equal(checkTruncation('.jpg', withTrailer, withTrailer, withTrailer.length).detected, false,
+    'trailing metadata after FFD9 is not truncation');
+  const farTail = Buffer.alloc(64 * 1024, 0x41);
+  assert.equal(checkTruncation('.jpg', jpg, farTail, jpg.length + farTail.length, { jpegVideoAfterEoi: true }).detected, false,
+    'motion photo: MP4 clip after FFD9');
+  const seft = Buffer.concat([farTail, Buffer.from('SEFT')]);
+  assert.equal(checkTruncation('.jpg', jpg, seft, jpg.length + seft.length).detected, false,
+    'Samsung SEFT trailer');
+  assert.equal(checkTruncation('.jpg', jpg, farTail, jpg.length + farTail.length).detected, true,
+    'no marker and no known trailer is still truncation');
+
   const png = makeValidPng('ok-png');
   assert.equal(checkTruncation('.png', png, png, png.length).detected, false);
   const cutPng = png.subarray(0, png.length - 12);

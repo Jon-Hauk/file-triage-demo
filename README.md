@@ -34,10 +34,10 @@ Excerpt from [`output/triage-report.md`](output/triage-report.md):
 
 | File | Size | What the scan saw |
 |---|---|---|
-| `client-proposals/meadowbrook-clinic-sow.docx` | 738 B | Extension is .docx (expected zip), but file header detected html |
-| `finance/2026-10-merchant-statement.pdf` | 737 B | Extension is .pdf (expected pdf), but file header detected html |
-| `photos/catalog-hero-banner.png` | 696 B | Extension is .png (expected png), but file header detected jpeg |
-| `photos/trade-show-badge-photo.jpg` | 826 B | Extension is .jpg (expected jpeg), but file header detected pdf |
+| `client-proposals/meadowbrook-clinic-sow.docx` | 738 B | Named .docx, but the contents are a web page (HTML) |
+| `finance/2026-10-merchant-statement.pdf` | 737 B | Named .pdf, but the contents are a web page (HTML) |
+| `photos/catalog-hero-banner.png` | 696 B | Named .png, but the contents are a JPEG photo |
+| `photos/trade-show-badge-photo.jpg` | 826 B | Named .jpg, but the contents are a PDF |
 ```
 
 ## What the scanner checks
@@ -47,7 +47,7 @@ Excerpt from [`output/triage-report.md`](output/triage-report.md):
 | Extension vs magic bytes | `.docx`, `.xlsx`, `.pptx`, `.pdf`, `.jpg`, `.png`, `.gif`, `.zip`, `.doc`, `.xls`, `.ppt`, `.rtf`, `.html`, `.xml` whose leading bytes do not match their extension | A portal session timed out and saved an HTML sign-in page as `.docx`/`.pdf`, or someone renamed a PDF as `.jpg` |
 | Zero-byte files | Files with `size === 0` | Copy created the destination directory entry before the transfer stalled or was cancelled |
 | All-zero-byte files | Non-empty files where every byte is `0x00` | Disk space was pre-allocated before a USB drive disconnected or sync failed |
-| Truncated files | ZIP/Office files missing an End-of-Central-Directory (`PK\x05\x06`) record, PDFs missing `%%EOF`, JPEGs missing `FFD9`, PNGs missing `IEND` | Network drop or interrupted copy stopped mid-stream after writing the header |
+| Truncated files | ZIP/Office files missing an End-of-Central-Directory (`PK\x05\x06`) record, PDFs missing `%%EOF`, JPEGs missing `FFD9` (camera metadata, Samsung trailers and motion-photo video stored after it are recognised, not flagged), PNGs missing `IEND` | Network drop or interrupted copy stopped mid-stream after writing the header |
 | Cloud placeholder stubs | `.icloud`, `.url`, `.webloc`, `.gdoc`, `.gsheet`, `.gslides`, `.dropbox` files, or tiny (`<= 512 B`) docs/images containing cloud-sync stub text | Online-only shortcuts or Files On-Demand stubs were copied instead of downloaded contents |
 | Path length over 260 chars | Relative or full paths exceeding 260 characters | Deeply nested client folders exceed Windows `MAX_PATH`, blocking Explorer and older Office apps |
 | Invalid Windows names | Path segments with `< > : " \| ? *`, control chars, trailing dots/spaces, or reserved device names (`CON`, `PRN`, `AUX`, `NUL`, `COM1`-`COM9`, `LPT1`-`LPT9`) | Files copied from macOS, Linux, or web archives that Windows refuses to open or copy |
@@ -66,7 +66,7 @@ Running `npm run report` writes three files into `output/`:
 
 ## How it is tested
 
-`npm test` runs 11 tests across two files using Node's built-in `node:test` runner:
+`npm test` runs 12 tests across two files using Node's built-in `node:test` runner:
 
 - [`test/detectors.test.js`](test/detectors.test.js) tests each detector individually (magic bytes, all-zero buffers, extension mismatches including encrypted OLE2 Office exceptions, truncation markers, cloud stubs, encryption flags, 260/261-char paths, and Windows-rejected names).
 - [`test/triage.test.js`](test/triage.test.js) generates a fresh 60-file synthetic tree into a temporary directory, snapshots every file path, size, and SHA-256 before and after `scanDirectory`, verifies the tree is untouched (read-only), and reconciles every file's detected issues 100% against `truth.json` with zero false positives across all 36 healthy files.
@@ -77,7 +77,7 @@ Requires Node.js 20 or newer (uses Node built-ins only; no external dependencies
 
 ```sh
 npm ci
-npm test            # 11 unit and reconciliation tests
+npm test            # 12 unit and reconciliation tests
 npm run generate    # creates 60 synthetic files in samples/broken-copy/ and samples/truth.json
 npm run report      # scans samples/broken-copy/ and writes output/triage-report.{md,html,csv}
 ```
