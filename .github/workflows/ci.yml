@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run detector unit tests and truth reconciliation
+        run: npm test
+      - name: Generate synthetic sample folder
+        run: npm run generate
+      - name: Generate triage reports
+        run: npm run report
+      - uses: actions/upload-artifact@v6
+        with:
+          name: triage-report
+          path: output/

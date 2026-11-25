@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>File Triage Report</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --border: #dfe3ea;
+      --text: #1b2430;
+      --muted: #5a6577;
+      --accent: #1d4ed8;
+      --warn-bg: #fff8eb;
+      --warn-border: #f59e0b;
+      --ok: #15803d;
+      --flag: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 2rem 1rem;
+    }
+    main { max-width: 1040px; margin: 0 auto; }
+    header { margin-bottom: 1.5rem; }
+    h1 { margin: 0 0 0.35rem 0; font-size: 1.75rem; }
+    h2 { margin: 0; font-size: 1.15rem; }
+    .subtitle { margin: 0; color: var(--muted); }
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+    }
+    .kpi .label { font-size: 0.85rem; color: var(--muted); }
+    .kpi .value { font-size: 1.6rem; font-weight: 700; margin-top: 0.2rem; }
+    .kpi .value.ok { color: var(--ok); }
+    .kpi .value.flag { color: var(--flag); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .group-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.85rem;
+    }
+    .badge {
+      background: #eef2ff;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .guidance {
+      background: var(--warn-bg);
+      border-left: 4px solid var(--warn-border);
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    .guidance p { margin: 0.25rem 0; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.65rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th { font-weight: 600; color: var(--muted); background: #fafbfc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .nowrap { white-space: nowrap; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.84rem; }
+    .path-cell { overflow-wrap: anywhere; max-width: 360px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer { color: var(--muted); font-size: 0.88rem; margin-top: 1.5rem; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .card, .kpi { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>File Triage Report</h1>
+      <p class="subtitle">Read-only scan of <code>samples/broken-copy</code>. No files were moved, renamed, modified, or deleted.</p>
+    </header>
+
+    <section class="kpis">
+      <div class="kpi">
+        <div class="label">Files scanned</div>
+        <div class="value">60</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Healthy files</div>
+        <div class="value ok">36</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Files needing attention</div>
+        <div class="value flag">24</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Total data size</div>
+        <div class="value">51.4 KB</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-bottom: 0.75rem;">Problem breakdown</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Problem group</th>
+              <th class="num">Files</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td><a href="#issue-extension_mismatch">Wrong file extension (header does not match filename)</a></td>
+            <td class="num">4</td>
+          </tr>
+          <tr>
+            <td><a href="#issue-zero_byte">Empty files (0 bytes)</a></td>
+            <td class="num">3</td>
+          </tr>
+          <tr>
+            <td><a href="#issue-all_zero_bytes">Blank files (filled with zero bytes)</a></td>
+            <td class="num">2</td>
+          </tr>
+          <tr>
+            <td><a href="#issue-truncated_file">Cut-off / incomplete files</a></td>
+            <td class="num">4</td>
+          </tr>
+          <tr>
+            <td><a href="#issue-cloud_placeholder">Cloud placeholder stubs (not full files)</a></td>
+            <td class="num">4</td>
+          </tr>
+          <tr>
+            <td><a href="#issue-password_protected">Password-protected / encrypted files</a></td>
+            <td class="num">2</td>
+          </tr>
+          <tr>
+            <td><a href="#issue-path_too_long">Paths over 260 characters</a></td>
+            <td class="num">2</td>
+          </tr>
+          <tr>
+            <td><a href="#issue-duplicate">Exact duplicate files</a></td>
+            <td class="num">3</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+      <section class="card group" id="issue-extension_mismatch">
+        <div class="group-head">
+          <h2>Wrong file extension (header does not match filename)</h2>
+          <span class="badge">4 files</span>
+        </div>
+        <div class="guidance">
+          <p><strong>Likely cause:</strong> A browser, portal, or script saved a web page (HTML) or a different file type under the original document or photo name.</p>
+          <p><strong>Safe next step:</strong> Test opening a copy with the detected file type (for example rename a copy to .html), or re-download from the original source.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th class="num">Size</th>
+                <th>What the scan saw</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td class="mono path-cell">client-proposals/meadowbrook-clinic-sow.docx</td>
+              <td class="num nowrap">738 B</td>
+              <td>Extension is .docx (expected zip), but file header detected html</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">finance/2026-10-merchant-statement.pdf</td>
+              <td class="num nowrap">737 B</td>
+              <td>Extension is .pdf (expected pdf), but file header detected html</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">photos/catalog-hero-banner.png</td>
+              <td class="num nowrap">696 B</td>
+              <td>Extension is .png (expected png), but file header detected jpeg</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">photos/trade-show-badge-photo.jpg</td>
+              <td class="num nowrap">826 B</td>
+              <td>Extension is .jpg (expected jpeg), but file header detected pdf</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card group" id="issue-zero_byte">
+        <div class="group-head">
+          <h2>Empty files (0 bytes)</h2>
+          <span class="badge">3 files</span>
+        </div>
+        <div class="guidance">
+          <p><strong>Likely cause:</strong> The copy created the filename entry in the destination folder, then failed or was cancelled before any data was written.</p>
+          <p><strong>Safe next step:</strong> Recover this file from the source drive, backup, or cloud trash; a 0-byte file contains no data to repair.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th class="num">Size</th>
+                <th>What the scan saw</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td class="mono path-cell">client-proposals/2026-q3-harborline-addendum.docx</td>
+              <td class="num nowrap">0 B</td>
+              <td>File size is 0 bytes</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">finance/2026-10-reimbursement-scan.pdf</td>
+              <td class="num nowrap">0 B</td>
+              <td>File size is 0 bytes</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">photos/storefront-signage-night.jpg</td>
+              <td class="num nowrap">0 B</td>
+              <td>File size is 0 bytes</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card group" id="issue-all_zero_bytes">
+        <div class="group-head">
+          <h2>Blank files (filled with zero bytes)</h2>
+          <span class="badge">2 files</span>
+        </div>
+        <div class="guidance">
+          <p><strong>Likely cause:</strong> Storage space was pre-allocated during a copy or sync, then the connection dropped or the drive disconnected before contents arrived.</p>
+          <p><strong>Safe next step:</strong> Do not try repair tools on an all-zero file; copy it again from the original source or a prior backup.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th class="num">Size</th>
+                <th>What the scan saw</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td class="mono path-cell">archive/2025-q4-backup-export.zip</td>
+              <td class="num nowrap">4.0 KB</td>
+              <td>All 4096 bytes are 0x00</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">finance/2026-09-payroll-register.xlsx</td>
+              <td class="num nowrap">8.0 KB</td>
+              <td>All 8192 bytes are 0x00</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card group" id="issue-truncated_file">
+        <div class="group-head">
+          <h2>Cut-off / incomplete files</h2>
+          <span class="badge">4 files</span>
+        </div>
+        <div class="guidance">
+          <p><strong>Likely cause:</strong> The transfer stopped mid-stream, leaving a valid file header without its closing end-of-file structure.</p>
+          <p><strong>Safe next step:</strong> Re-copy from the source first. If the original is gone, work only on a copy when testing recovery tools.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th class="num">Size</th>
+                <th>What the scan saw</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td class="mono path-cell">client-proposals/2026-q2-birchwood-contract.docx</td>
+              <td class="num nowrap">867 B</td>
+              <td>ZIP/Office container (.docx) is missing End-of-Central-Directory (EOCD) record</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">finance/2026-10-invoice-batch.pdf</td>
+              <td class="num nowrap">675 B</td>
+              <td>PDF file has %PDF- header but is missing %%EOF end marker</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">photos/event-stage-wide.jpg</td>
+              <td class="num nowrap">616 B</td>
+              <td>JPEG image is missing FFD9 end-of-image (EOI) marker</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">photos/logo-print-master.png</td>
+              <td class="num nowrap">591 B</td>
+              <td>PNG image is missing IEND trailer chunk</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card group" id="issue-cloud_placeholder">
+        <div class="group-head">
+          <h2>Cloud placeholder stubs (not full files)</h2>
+          <span class="badge">4 files</span>
+        </div>
+        <div class="guidance">
+          <p><strong>Likely cause:</strong> Only an online shortcut or cloud-sync stub (.icloud, .url, .gsheet, or Files On-Demand stub) was copied instead of the downloaded file.</p>
+          <p><strong>Safe next step:</strong> Open the original cloud folder on a signed-in device, mark the folder &quot;Always keep on this device&quot; or export offline copies, then copy again.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th class="num">Size</th>
+                <th>What the scan saw</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td class="mono path-cell">client-proposals/shared-client-folder.url</td>
+              <td class="num nowrap">81 B</td>
+              <td>Cloud shortcut/stub extension (.url)</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">finance/2026-budget-live.gsheet</td>
+              <td class="num nowrap">81 B</td>
+              <td>Cloud shortcut/stub extension (.gsheet)</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">hr-templates/benefits-enrollment-2026.pdf</td>
+              <td class="num nowrap">81 B</td>
+              <td>Small (81 B) stub file matching cloud placeholder text instead of pdf data</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">photos/.workshop-raw-album.icloud</td>
+              <td class="num nowrap">129 B</td>
+              <td>Cloud shortcut/stub extension (.icloud)</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card group" id="issue-password_protected">
+        <div class="group-head">
+          <h2>Password-protected / encrypted files</h2>
+          <span class="badge">2 files</span>
+        </div>
+        <div class="guidance">
+          <p><strong>Likely cause:</strong> The file is intentionally encrypted with a password and was left unopened by this scan.</p>
+          <p><strong>Safe next step:</strong> Confirm with the file owner whether the password is known; keep the file intact and never run brute-force crackers on client files.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th class="num">Size</th>
+                <th>What the scan saw</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td class="mono path-cell">finance/2026-executive-comp-model.xlsx</td>
+              <td class="num nowrap">2.0 KB</td>
+              <td>Encrypted Office container (OLE2 EncryptionInfo stream inside .xlsx)</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">hr-templates/signed-background-consent.pdf</td>
+              <td class="num nowrap">1.0 KB</td>
+              <td>PDF declares /Encrypt dictionary (password or permissions locked)</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card group" id="issue-path_too_long">
+        <div class="group-head">
+          <h2>Paths over 260 characters</h2>
+          <span class="badge">2 files</span>
+        </div>
+        <div class="guidance">
+          <p><strong>Likely cause:</strong> Deeply nested folders pushed the full path past the classic Windows 260-character limit, causing Explorer and older Office apps to fail to open it.</p>
+          <p><strong>Safe next step:</strong> Copy the parent folder to a shorter root path (for example C:\Triage\) or shorten intermediate folder names before opening.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th class="num">Size</th>
+                <th>What the scan saw</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td class="mono path-cell">archive/2025-client-deliverables-backup/regional-operations-north/quarterly-project-archive-folders/birchwood-bakery-rebrand-project-files/final-print-production-assets-approved-by-marketing-director/2025-11-approved-vendor-pack/birchwood-print-order-summary-final-signed.pdf</td>
+              <td class="num nowrap">833 B</td>
+              <td>Relative path is 275 characters (exceeds 260)</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">archive/2025-client-deliverables-backup/regional-operations-south/quarterly-project-archive-folders/cedar-ridge-dental-office-expansion/financial-tracking-workbooks-and-contractor-bids-folder/2025-12-approved-budget-workbooks/cedar-ridge-contractor-cost-breakdown.xlsx</td>
+              <td class="num nowrap">1002 B</td>
+              <td>Relative path is 268 characters (exceeds 260)</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card group" id="issue-duplicate">
+        <div class="group-head">
+          <h2>Exact duplicate files</h2>
+          <span class="badge">3 files</span>
+        </div>
+        <div class="guidance">
+          <p><strong>Likely cause:</strong> Repeated drag-and-drop attempts or merged backup folders left byte-for-byte identical copies in multiple places.</p>
+          <p><strong>Safe next step:</strong> Verify one copy opens cleanly, then archive or remove redundant duplicates only after client sign-off.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>File</th>
+                <th class="num">Size</th>
+                <th>What the scan saw</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td class="mono path-cell">unsorted-duplicates/2026-10-cashflow-forecast-copy.xlsx</td>
+              <td class="num nowrap">1002 B</td>
+              <td>Exact duplicate of finance/2026-10-cashflow-forecast.xlsx (SHA-256 69375548f057)</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">unsorted-duplicates/2026-q1-birchwood-bakery-proposal-copy.pdf</td>
+              <td class="num nowrap">832 B</td>
+              <td>Exact duplicate of client-proposals/2026-q1-birchwood-bakery-proposal.pdf (SHA-256 b6e89317ffd1)</td>
+            </tr>
+            <tr>
+              <td class="mono path-cell">unsorted-duplicates/office-lobby-east-copy.jpg</td>
+              <td class="num nowrap">696 B</td>
+              <td>Exact duplicate of photos/office-lobby-east.jpg (SHA-256 05dc559356c5)</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    <footer>
+      Full file-by-file inventory (including healthy files and SHA-256 hashes) is written to <code>triage-report.csv</code>.
+    </footer>
+  </main>
+</body>
+</html>
