@@ -1,0 +1,16 @@
+{
+  "name": "file-triage-demo",
+  "version": "1.0.0",
+  "description": "Read-only scanner that triages files that copied over but will not open, producing client-ready Markdown, HTML, and CSV reports. Synthetic data only.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "generate": "node src/generate.js",
+    "report": "node src/run.js",
+    "test": "node --test test/*.test.js"
+  }
+}

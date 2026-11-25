@@ -1,0 +1,366 @@
+{
+  "totalFiles": 60,
+  "healthyCount": 36,
+  "flaggedCount": 24,
+  "countsByIssue": {
+    "extension_mismatch": 4,
+    "zero_byte": 3,
+    "all_zero_bytes": 2,
+    "truncated_file": 4,
+    "cloud_placeholder": 4,
+    "password_protected": 2,
+    "path_too_long": 2,
+    "invalid_windows_name": 0,
+    "duplicate": 3
+  },
+  "files": [
+    {
+      "path": "archive/2025-annual-summary.pdf",
+      "size": 823,
+      "issues": []
+    },
+    {
+      "path": "archive/2025-asset-register.xlsx",
+      "size": 1002,
+      "issues": []
+    },
+    {
+      "path": "archive/2025-brand-palette.png",
+      "size": 631,
+      "issues": []
+    },
+    {
+      "path": "archive/2025-client-deliverables-backup/regional-operations-north/quarterly-project-archive-folders/birchwood-bakery-rebrand-project-files/final-print-production-assets-approved-by-marketing-director/2025-11-approved-vendor-pack/birchwood-print-order-summary-final-signed.pdf",
+      "size": 833,
+      "issues": [
+        "path_too_long"
+      ]
+    },
+    {
+      "path": "archive/2025-client-deliverables-backup/regional-operations-south/quarterly-project-archive-folders/cedar-ridge-dental-office-expansion/financial-tracking-workbooks-and-contractor-bids-folder/2025-12-approved-budget-workbooks/cedar-ridge-contractor-cost-breakdown.xlsx",
+      "size": 1002,
+      "issues": [
+        "path_too_long"
+      ]
+    },
+    {
+      "path": "archive/2025-office-lease-scan.pdf",
+      "size": 826,
+      "issues": []
+    },
+    {
+      "path": "archive/2025-q4-backup-export.zip",
+      "size": 4096,
+      "issues": [
+        "all_zero_bytes"
+      ]
+    },
+    {
+      "path": "archive/2025-vendor-contacts.csv",
+      "size": 125,
+      "issues": []
+    },
+    {
+      "path": "archive/legacy-readme.txt",
+      "size": 84,
+      "issues": []
+    },
+    {
+      "path": "client-proposals/2026-q1-birchwood-bakery-proposal.pdf",
+      "size": 832,
+      "issues": []
+    },
+    {
+      "path": "client-proposals/2026-q1-birchwood-scope.docx",
+      "size": 987,
+      "issues": []
+    },
+    {
+      "path": "client-proposals/2026-q2-birchwood-contract.docx",
+      "size": 867,
+      "issues": [
+        "truncated_file"
+      ]
+    },
+    {
+      "path": "client-proposals/2026-q2-cedar-ridge-dental-estimate.xlsx",
+      "size": 1002,
+      "issues": []
+    },
+    {
+      "path": "client-proposals/2026-q2-cedar-ridge-kickoff-deck.pptx",
+      "size": 960,
+      "issues": []
+    },
+    {
+      "path": "client-proposals/2026-q2-harborline-hardware-retainer.pdf",
+      "size": 832,
+      "issues": []
+    },
+    {
+      "path": "client-proposals/2026-q3-clearwater-roasters-brief.docx",
+      "size": 987,
+      "issues": []
+    },
+    {
+      "path": "client-proposals/2026-q3-harborline-addendum.docx",
+      "size": 0,
+      "issues": [
+        "zero_byte"
+      ]
+    },
+    {
+      "path": "client-proposals/2026-q3-larkspur-print-specs.pdf",
+      "size": 833,
+      "issues": []
+    },
+    {
+      "path": "client-proposals/meadowbrook-clinic-sow.docx",
+      "size": 738,
+      "issues": [
+        "extension_mismatch"
+      ]
+    },
+    {
+      "path": "client-proposals/proposal-checklist.txt",
+      "size": 108,
+      "issues": []
+    },
+    {
+      "path": "client-proposals/shared-client-folder.url",
+      "size": 81,
+      "issues": [
+        "cloud_placeholder"
+      ]
+    },
+    {
+      "path": "finance/2026-08-bank-reconciliation.xlsx",
+      "size": 1002,
+      "issues": []
+    },
+    {
+      "path": "finance/2026-09-ap-aging-summary.csv",
+      "size": 99,
+      "issues": []
+    },
+    {
+      "path": "finance/2026-09-expense-receipts.pdf",
+      "size": 835,
+      "issues": []
+    },
+    {
+      "path": "finance/2026-09-payroll-register.xlsx",
+      "size": 8192,
+      "issues": [
+        "all_zero_bytes"
+      ]
+    },
+    {
+      "path": "finance/2026-10-cashflow-forecast.xlsx",
+      "size": 1002,
+      "issues": []
+    },
+    {
+      "path": "finance/2026-10-invoice-batch.pdf",
+      "size": 675,
+      "issues": [
+        "truncated_file"
+      ]
+    },
+    {
+      "path": "finance/2026-10-merchant-statement.pdf",
+      "size": 737,
+      "issues": [
+        "extension_mismatch"
+      ]
+    },
+    {
+      "path": "finance/2026-10-reimbursement-scan.pdf",
+      "size": 0,
+      "issues": [
+        "zero_byte"
+      ]
+    },
+    {
+      "path": "finance/2026-10-vendor-payments.csv",
+      "size": 90,
+      "issues": []
+    },
+    {
+      "path": "finance/2026-budget-live.gsheet",
+      "size": 81,
+      "issues": [
+        "cloud_placeholder"
+      ]
+    },
+    {
+      "path": "finance/2026-executive-comp-model.xlsx",
+      "size": 2048,
+      "issues": [
+        "password_protected"
+      ]
+    },
+    {
+      "path": "finance/2026-q3-tax-prep-notes.docx",
+      "size": 987,
+      "issues": []
+    },
+    {
+      "path": "finance/chart-of-accounts.xlsx",
+      "size": 1002,
+      "issues": []
+    },
+    {
+      "path": "finance/payroll-schedule-2026.pdf",
+      "size": 825,
+      "issues": []
+    },
+    {
+      "path": "hr-templates/benefits-enrollment-2026.pdf",
+      "size": 81,
+      "issues": [
+        "cloud_placeholder"
+      ]
+    },
+    {
+      "path": "hr-templates/contractor-onboarding-guide.pdf",
+      "size": 831,
+      "issues": []
+    },
+    {
+      "path": "hr-templates/equipment-checkout-form.docx",
+      "size": 987,
+      "issues": []
+    },
+    {
+      "path": "hr-templates/holiday-calendar-2026.pdf",
+      "size": 832,
+      "issues": []
+    },
+    {
+      "path": "hr-templates/onboarding-slides.pptx",
+      "size": 960,
+      "issues": []
+    },
+    {
+      "path": "hr-templates/pto-request-tracker.xlsx",
+      "size": 1002,
+      "issues": []
+    },
+    {
+      "path": "hr-templates/safety-handbook-v2.docx",
+      "size": 987,
+      "issues": []
+    },
+    {
+      "path": "hr-templates/signed-background-consent.pdf",
+      "size": 1071,
+      "issues": [
+        "password_protected"
+      ]
+    },
+    {
+      "path": "photos/.workshop-raw-album.icloud",
+      "size": 129,
+      "issues": [
+        "cloud_placeholder"
+      ]
+    },
+    {
+      "path": "photos/booth-banner-proof.png",
+      "size": 631,
+      "issues": []
+    },
+    {
+      "path": "photos/catalog-hero-banner.png",
+      "size": 696,
+      "issues": [
+        "extension_mismatch"
+      ]
+    },
+    {
+      "path": "photos/event-stage-wide.jpg",
+      "size": 616,
+      "issues": [
+        "truncated_file"
+      ]
+    },
+    {
+      "path": "photos/logo-print-master.png",
+      "size": 591,
+      "issues": [
+        "truncated_file"
+      ]
+    },
+    {
+      "path": "photos/office-lobby-east.jpg",
+      "size": 696,
+      "issues": []
+    },
+    {
+      "path": "photos/office-lobby-west.jpg",
+      "size": 696,
+      "issues": []
+    },
+    {
+      "path": "photos/product-packaging-front.png",
+      "size": 631,
+      "issues": []
+    },
+    {
+      "path": "photos/product-packaging-side.png",
+      "size": 631,
+      "issues": []
+    },
+    {
+      "path": "photos/storefront-signage-day.jpg",
+      "size": 696,
+      "issues": []
+    },
+    {
+      "path": "photos/storefront-signage-night.jpg",
+      "size": 0,
+      "issues": [
+        "zero_byte"
+      ]
+    },
+    {
+      "path": "photos/team-workshop-table.jpg",
+      "size": 696,
+      "issues": []
+    },
+    {
+      "path": "photos/trade-show-badge-photo.jpg",
+      "size": 826,
+      "issues": [
+        "extension_mismatch"
+      ]
+    },
+    {
+      "path": "photos/warehouse-rack-layout.png",
+      "size": 631,
+      "issues": []
+    },
+    {
+      "path": "unsorted-duplicates/2026-10-cashflow-forecast-copy.xlsx",
+      "size": 1002,
+      "issues": [
+        "duplicate"
+      ]
+    },
+    {
+      "path": "unsorted-duplicates/2026-q1-birchwood-bakery-proposal-copy.pdf",
+      "size": 832,
+      "issues": [
+        "duplicate"
+      ]
+    },
+    {
+      "path": "unsorted-duplicates/office-lobby-east-copy.jpg",
+      "size": 696,
+      "issues": [
+        "duplicate"
+      ]
+    }
+  ]
+}
